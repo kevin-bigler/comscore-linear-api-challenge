@@ -1,0 +1,25 @@
+{
+  "name": "comscore-linear-api-challenge",
+  "version": "1.0.0",
+  "description": "comscore linear api challenge",
+  "main": "index.js",
+  "bin": {
+    "comscore-challenge": "bin/main.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevin-bigler/comscore-linear-api-challenge.git"
+  },
+  "author": "Kevin Bigler <kevinbigler@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kevin-bigler/comscore-linear-api-challenge/issues"
+  },
+  "homepage": "https://github.com/kevin-bigler/comscore-linear-api-challenge#readme",
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}
