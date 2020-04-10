@@ -1,6 +1,6 @@
 const { streamFileLines: defaultStreamFileLines } = require('./import/streamFileLines');
 const { parseLine: defaultParseLine } = require('./import/parseLine');
-const { persistEntry: defaultPersistEntry } = require('./import/persistEntry');
+const StatRepository = require('./StatRepository'); // TODO
 
 /**
  * Factory for importFile function, allows Dependency Injection
@@ -13,8 +13,8 @@ const createImportFile = ({
     persistEntry = defaultPersistEntry
 }) => ({path}) => {
     streamFileLines(path, async (line) => {
-        const entry = parseLine(line);
-        await persistEntry(entry);
+        const stat = parseLine(line);
+        await statRepo.save(stat);
     });
 };
 

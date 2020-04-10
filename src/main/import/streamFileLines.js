@@ -24,7 +24,9 @@ const createStreamFileLines = ({fs = defaultFs, readline = defaultReadline}) => 
     });
 
     for await (const line of rl) {
-        await cb(line);
+        if (line.length > 0) {
+            await cb(line);
+        }
     }
 };
 

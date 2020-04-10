@@ -11,13 +11,19 @@ npm link
 
 ## CLI
 
-format
+query format includes args for SELECT, ORDER and FILTER
+
+- SELECT (`-s <select>`) &mdash; required. comma separated field names
+- ORDER (`-o <order>`) &mdash; optional. one or more comma separated field names to order by
+- FILTER (`-f <filter>`) &mdash; optional. predicate condition to filter results by
+
+format:
 
 ```sh
-query 
+query -s <select> -o <order> -f <filter>
 ```
 
-examples
+examples:
 
 ```sh
 query -s TITLE,REV,DATE -o DATE,TITLE
