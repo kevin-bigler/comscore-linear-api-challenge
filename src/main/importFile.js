@@ -1,5 +1,5 @@
 const { streamFileLines: defaultStreamFileLines } = require('./import/streamFileLines');
-const { parseLine: defaultParseLine } = require('./import/parseLine');
+const { parseLine: defaultParseLine } = require('./import/parseImportLine');
 const StatRepository = require('./StatRepository'); // TODO
 
 /**
