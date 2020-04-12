@@ -1,1 +1,1 @@
-// TODO
+// TODO: handle the command, parsing the cli params and using StatRepository

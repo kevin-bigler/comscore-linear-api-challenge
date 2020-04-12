@@ -2,13 +2,13 @@ const { streamFileLines: defaultStreamFileLines } = require('./import/streamFile
 require('./types');
 
 /**
- * Stores and Accesses Watch Statistics (aka "Stats")
- * TODO
+ * Stores and Accesses {@link Stat Watch Statistics (aka "Stats")}
  */
 class StatRepository {
     /**
      * DI constructor
      * @param {Object} deps
+     * TODO: add param to define where the repo resides (ie file or directory path?)
      */
     constructor({streamFileLines = defaultStreamFileLines}) {
         this._streamFileLines = streamFileLines;
@@ -37,3 +37,11 @@ class StatRepository {
 
     }
 }
+
+module.exports = {
+    StatRepository,
+    /**
+     * singleton instance using default deps
+     */
+    statRepo: new StatRepository({})
+};
