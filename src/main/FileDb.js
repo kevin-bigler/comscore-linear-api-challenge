@@ -3,6 +3,7 @@ const replaceInFile = require('replace-in-file');
 const json2Csv = require('json2csv');
 const fs = require('fs');
 const path = require('path');
+const escapeRegex = require('escape-string-regexp');
 
 /**
  * File system-backed database interface
@@ -42,7 +43,16 @@ class FileDb {
     async save(entry) {
         const row = this._toCsv(entry);
         // TODO: save the row to the file -- try to replace, and if that didn't work, append to the file
-        fs.appendFileSync(this._path, row + "\n");
+        const opts = {fields: ['UNIQUE_KEY'], header: false};
+        const keyFormatted = json2Csv.parse({UNIQUE_KEY: this._getUniqueKey(entry)}, opts);
+        const result = await replaceInFile({
+            files: this._path,
+            from: new RegExp('^' + escapeRegex(keyFormatted) + ',.+$', 'gm'),
+            to: row
+        });
+        if (!result[0].hasChanged) {
+            await fs.promises.appendFile(this._path, row + "\n");
+        }
     }
 
     async search(query) {
