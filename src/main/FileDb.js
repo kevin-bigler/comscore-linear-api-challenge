@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const escapeRegex = require('escape-string-regexp');
 const papaparse = require('papaparse');
+const R = require('ramda');
+const { getPredicateFn } = require('./getPredicateFn');
 
 /**
  * File system-backed database interface
@@ -57,7 +59,19 @@ class FileDb {
         }
     }
 
-    async search({filter, order, select}) {
+    /**
+     *
+     * @param {[string]} filter filter expression(s) TODO
+     * @param {[string]} order field(s) to order by
+     * @param {[string]} field(s) to select for results
+     * @returns {Promise<unknown[]>}
+     */
+    async search({filter= [], order= [], select = []}) {
+        // TODO: do all 3 query params have to be present? do validation, test it
+        // 1. read line by line (./import/streamFileLines())
+        // 2. filter the line (check against predicate, ie query.filter())
+        // 3. sort by query.order field name
+        // 4. pick only the properties listed in query.select[] field names array
         const matches = [];
         await this._streamFileLines(this._path, async (line) => {
             const record = this._parseCsvLine(line);
@@ -65,24 +79,46 @@ class FileDb {
                 matches.push(record);
             }
         });
-        // 1. read line by line (./import/streamFileLines())
-        // 2. filter the line (check against predicate, ie query.filter())
-        // 3. sort by query.order field name
-        // 4. pick only the properties listed in query.select[] field names array
+        // TODO: validate 'select' -- has to just be values from this._columns (error or ignore other values given)
+        console.log('matches', matches);
+        console.log('filter', filter);
+        console.log('order', order);
+        console.log('select', select);
+        const compare = (field) => (a, b) => {
+            const aString = a[field]+'';
+            const bString = b[field]+'';
+            return aString.localeCompare(bString);
+        };
+        // note: js Array sorting is in-place
+        order.forEach(orderField => matches.sort(compare(orderField)));
+        return matches.map(R.pick(select));
     }
 
     _parseCsvLine(line) {
-        // TODO
         const parsed = papaparse.parse(line);
-        const record = this._columns.map((k, i) => {
-            return {[k]: parsed.data[0][i]};
-        }).reduce((obj, cur) => ({...obj, ...cur}), {});
-        console.debug('parsed result:', record);
-        return record;
+        const lineValues = parsed.data[0];
+        return this._columns
+            .map((k, i) =>
+                ({[k]: lineValues[i]}))
+            .reduce((obj, cur) =>
+                ({...obj, ...cur}),
+                {});
     }
 
+    /**
+     * tests predicates (filter) against the given record
+     *
+     * @param {Object} record
+     * @param {[string]} filter predicate statement(s)
+     * @returns {boolean}
+     * @private
+     */
     _isMatch(record, filter) {
-        // TODO
+        const passes = filter
+            .map(getPredicateFn)
+            .filter(predicateFn => predicateFn(record));
+        console.debug('_isMatch summary', {numPasses: passes.length, numFilters: filter.length});
+        return passes.length === filter.length;
     }
 
     /**

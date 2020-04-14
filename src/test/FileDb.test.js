@@ -134,4 +134,59 @@ describe('FileDb', () => {
         await fileDb.save({foo: 'a', bar: 'b', baz: 'c'})
         expect(fileDb._parseCsvLine('"a|b","a","b","c"')).toEqual({UNIQUE_KEY: 'a|b', foo: 'a', bar: 'b', baz: 'c'});
     });
+
+    it('#search() happy path', async () => {
+        const fileDb = new FileDb({
+            path: preExistingTestFilePath,
+            columns: ['x', 'y', 'z'],
+            keys: ['x', 'y']
+        });
+        const actual = await fileDb.search({filter: '', order: 'x,y', select: 'x,z'});
+        console.log('actual', actual);
+        expect(Array.isArray(actual)).toBe(true);
+        expect(actual.length).toBe(2);
+    });
+
+    it('#_isMatch() happy path', () => {
+        expect(fileDb._isMatch(
+            {foo: '1', bar: '2', baz: '3'},
+            ['bar=2']))
+            .toBe(true);
+        expect(fileDb._isMatch(
+            {foo: '1', bar: '2', baz: '3'},
+            ['foo=3']))
+            .toBe(false);
+        expect(fileDb._isMatch(
+            {foo: '1', bar: '2', baz: '3'},
+            ['baz=3', 'foo=1']))
+            .toBe(true);
+        expect(fileDb._isMatch(
+            {foo: '1', bar: '2', baz: '3'},
+            ['bar=2', 'baz=10']))
+            .toBe(false);
+        expect(fileDb._isMatch(
+            {foo: '1', bar: '2', baz: '3'},
+            ['bar>1']))
+            .toBe(true);
+        expect(fileDb._isMatch(
+            {foo: '1', bar: '2', baz: '3'},
+            ['foo>=1']))
+            .toBe(true);
+        expect(fileDb._isMatch(
+            {foo: '1', bar: '2', baz: '3'},
+            ['foo>1']))
+            .toBe(false);
+        expect(fileDb._isMatch(
+            {foo: '1', bar: '2', baz: '3'},
+            ['baz<10']))
+            .toBe(true);
+        expect(fileDb._isMatch(
+            {foo: '1', bar: '2', baz: '3'},
+            ['bar<=2']))
+            .toBe(true);
+    });
+
+    // TODO test order
+
+    // TODO test select
 });
