@@ -91,7 +91,10 @@ class FileDb {
         };
         // note: js Array sorting is in-place
         order.forEach(orderField => matches.sort(compare(orderField)));
-        return matches.map(R.pick(select));
+        console.debug('ordered:', matches);
+        const results = matches.map(R.pick(select));
+        console.debug('results after select applied', results);
+        return results;
     }
 
     _parseCsvLine(line) {

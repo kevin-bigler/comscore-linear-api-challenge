@@ -1,3 +1,5 @@
+// TODO: turn this into a factory and export { getStatRepository }
+
 const { FileDb: DefaultFileDb } = require('./FileDb');
 require('./types');
 

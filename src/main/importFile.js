@@ -1,6 +1,6 @@
 const { streamFileLines: defaultStreamFileLines } = require('./import/streamFileLines');
-const { parseLine: defaultParseLine } = require('./import/parseImportLine');
-const StatRepository = require('./StatRepository'); // TODO
+const { parseImportLine: defaultParseImportLine } = require('./import/parseImportLine');
+const { getStatRepository: defaultGetStatRepository } = require('./statRepository');
 
 /**
  * Factory for importFile function, allows Dependency Injection
@@ -9,8 +9,8 @@ const StatRepository = require('./StatRepository'); // TODO
  */
 const createImportFile = ({
     streamFileLines = defaultStreamFileLines,
-    parseLine = defaultParseLine,
-    persistEntry = defaultPersistEntry
+    parseLine = defaultParseImportLine,
+    statRepo = defaultGetStatRepository()
 }) => ({path}) => {
     streamFileLines(path, async (line) => {
         const stat = parseLine(line);

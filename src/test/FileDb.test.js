@@ -12,8 +12,7 @@ describe('FileDb', () => {
     const preExistingTestFileResourcesPath = path.resolve('src', 'test', 'resources', 'preexisting_test_db_file.csv');
 
     beforeEach(async () => {
-        const uuid = uuidv4();
-        console.log('uuid:', uuid);
+        const uuid = uuidv4(); // unique db suffix per test
         testFilePath = path.resolve('src', 'test', 'db', `test_db_file${uuid}.csv`);
         preExistingTestFilePath = path.resolve('src', 'test', 'db', `preexisting_test_db_file${uuid}.csv`);
         fileDb = new FileDb({
@@ -141,10 +140,21 @@ describe('FileDb', () => {
             columns: ['x', 'y', 'z'],
             keys: ['x', 'y']
         });
-        const actual = await fileDb.search({filter: '', order: 'x,y', select: 'x,z'});
-        console.log('actual', actual);
+        const actual = await fileDb.search({order: ['x'], select: ['x,z']});
         expect(Array.isArray(actual)).toBe(true);
         expect(actual.length).toBe(2);
+    });
+
+    it('#search() happy path 2', async () => {
+        const fileDb = new FileDb({
+            path: preExistingTestFilePath,
+            columns: ['x', 'y', 'z'],
+            keys: ['x', 'y']
+        });
+        const actual = await fileDb.search({filter: ['x=goodnight'], order: ['x'], select: ['x', 'z']});
+        expect(Array.isArray(actual)).toBe(true);
+        expect(actual.length).toBe(1);
+        expect(actual).toEqual([{x: 'goodnight', z: 'tonight'}]);
     });
 
     it('#_isMatch() happy path', () => {
