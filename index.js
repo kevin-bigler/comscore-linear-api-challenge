@@ -39,10 +39,11 @@ const importCommand = ({path}) => {
 /**
  * parse cli params and pass on to appropriate service/fn
  */
-const queryCommand = ({}) => {
+const queryCommand = async ({f, o, s}) => {
     // TODO: validate input
     // TODO: define params
-    return queryStats({});
+    const results = await queryStats({filter: f, order: o, select: s});
+    results.forEach(console.log);
 };
 
 module.exports = {
