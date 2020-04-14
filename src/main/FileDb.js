@@ -30,7 +30,7 @@ class FileDb {
 
         this._path = path;
         this._streamFileLines = streamFileLines;
-        this._columns = columns;
+        this._columns = ['UNIQUE_KEY', ...columns];
         this._keys = keys;
     }
 
@@ -61,8 +61,25 @@ class FileDb {
      * @private
      */
     _toCsv(entry) {
-        const opts = { fields: this._columns, header: false };
-        return json2Csv.parse(entry, opts);
+        const opts = {fields: this._columns, header: false};
+        return json2Csv.parse({
+                UNIQUE_KEY: this._getUniqueKey(entry),
+                ...entry
+            },
+            opts
+        );
+    }
+
+    /**
+     * gets unique key value for an entry, based on defined key fields
+     * @param {Object} entry
+     * @returns {string} entry's unique key value (joined by '|' if multi-part key)
+     * @private
+     */
+    _getUniqueKey(entry) {
+        return this._keys
+            .map(k => entry[k])
+            .join('|');
     }
 
     _ensureFileExists(filePath) {
