@@ -11,6 +11,16 @@ npm link
 
 ## CLI
 
+### import
+
+```sh
+comscore-challenge import -s <source path>
+```
+
+source path points to a pipe-delimited file of watch statistics
+
+### query
+
 query format includes args for SELECT, ORDER and FILTER
 
 - SELECT (`-s <select>`) &mdash; required. comma separated field names
@@ -20,14 +30,14 @@ query format includes args for SELECT, ORDER and FILTER
 format:
 
 ```sh
-query -s <select> -o <order> -f <filter>
+comscore-challenge query -s <select> -o <order> -f <filter>
 ```
 
 examples:
 
 ```sh
-query -s TITLE,REV,DATE -o DATE,TITLE
-query -s TITLE,REV,DATE -f DATE=2014-04-01
+comscore-challenge query -s TITLE,REV,DATE -o DATE,TITLE
+comscore-challenge query -s TITLE,REV,DATE -f DATE=2014-04-01
 ```
 
 ## Watch Statistic
