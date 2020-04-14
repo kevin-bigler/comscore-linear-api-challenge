@@ -179,7 +179,7 @@ describe('FileDb', () => {
         expect(fileDb._isMatch(
             {foo: '1', bar: '2', baz: '3'},
             ['baz<10']))
-            .toBe(true);
+            .toBe(false); // it's a NATURAL sort (ie string, not numeric)
         expect(fileDb._isMatch(
             {foo: '1', bar: '2', baz: '3'},
             ['bar<=2']))

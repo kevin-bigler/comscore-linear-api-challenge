@@ -1,7 +1,8 @@
 /**
  * break filter string into parts
- * @param {string} filter string in format <field><compare operator><value>, ex: foo>=5
  * TODO: unit test
+ * @param {string} filter string in format <field><compare operator><value>, ex: foo>=5
+ * @returns {{compare: (function({string}, {string}): boolean), field: {string}, value: {string}}}
  */
 const parseFilterTokens = (filter) => {
     // the zeroth entry is the full match (eg foo>=5), hence starting at index 1 for field etc individual values
@@ -9,7 +10,7 @@ const parseFilterTokens = (filter) => {
     console.debug('filter tokens:', {field, operator, value});
     return {
         field,
-        compare: (entry, field, value) => getCompareFn(operator)(entry[field], value),
+        compare: getCompareFn(operator),
         value
     };
 };
@@ -18,7 +19,7 @@ const parseFilterTokens = (filter) => {
  * get compare function based on operator token
  *
  * @param {string} operator operator string like '=', '>' etc
- * @returns {function({Object}, {string}, {string}): boolean} predicate function to call with compare(entry, field, value)
+ * @returns {function({string}, {string}): boolean} predicate function to call with compare(a, b)
  */
 const getCompareFn = (operator) => {
     switch (operator) {
