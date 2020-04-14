@@ -42,9 +42,12 @@ const getCommandFn = (command) => {
  *
  * @param {Object} args
  * @param {string} args.s Source path, pointing to a file pipe-separated-values (see README)
+ * // TODO: add arg "destination" (-d)
  */
 const importCommand = ({s}) => {
-    // TODO: validate input
+    if (!s) {
+        throw new Error('missing source argument (-s)');
+    }
     return importFile({path: s});
 };
 

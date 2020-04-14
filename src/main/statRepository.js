@@ -1,3 +1,4 @@
+const path = require('path');
 const { FileDb: DefaultFileDb } = require('./FileDb');
 require('./types');
 
@@ -26,10 +27,10 @@ const keys = [
  */
 const createGetStatRepository = ({ FileDb = DefaultFileDb }) =>
     ({pathSuffix = getDateString()}) => {
-    const path = path.resolve('db', `${type}_${pathSuffix}.${extension}`);
-    console.log(`repository created at: ${path}`);
+    const filePath = path.resolve('db', `${type}_${pathSuffix}.${extension}`);
+    console.log(`repository created at: ${filePath}`);
     return new FileDb({
-        path,
+        path: filePath,
         columns,
         keys
     });
