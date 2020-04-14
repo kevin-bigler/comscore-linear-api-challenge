@@ -1,11 +1,9 @@
-// TODO: turn this into a factory and export { getStatRepository }
-
 const { FileDb: DefaultFileDb } = require('./FileDb');
 require('./types');
 
+// note: could configure this info instead of hard-coding (ie use "config" package and config/default.yaml to define)
 const type = 'StatRepository';
 const extension = 'csv';
-
 const columns = [
     'STB',
     'TITLE',
@@ -14,7 +12,6 @@ const columns = [
     'REV',
     'VIEW_TIME'
 ];
-
 const keys = [
     'STB',
     'TITLE',
@@ -22,49 +19,21 @@ const keys = [
 ];
 
 /**
- * Stores and Accesses {@link Stat Watch Statistics (aka "Stats")}
- * TODO: could just change this into a factory, ie getRepo({type, suffix, columns, keys}); which could memoize the repo by type+suffix. can also configure the columns+keys in a config/default.yaml
+ * DI factory that creates a factory that creates a repo... :(
+ * don't worry about that unless doing unit testing. otherwise, use the default export using default FileDb impl
+ *
+ * repo to Store and Access {@link Stat Watch Statistics (aka "Stats")}
  */
-class StatRepository {
-    /**
-     * DI constructor
-     * @param {Object} deps
-     */
-    constructor({
-        FileDb = DefaultFileDb,
-        pathSuffix = getDateString()
-    }) {
-        this._path = path.resolve('db', `${type}_${pathSuffix}.${extension}`);
-        this._fileDb = new FileDb({
-            path: this._path,
-            columns,
-            keys
-        });
-    }
-
-    /**
-     * persist a {@link Stat stat} object
-     *
-     * @param {Stat} stat
-     * @returns {Promise<void>}
-     */
-    async save(stat) {
-        return this._fileDb.save(stat);
-    }
-
-    /**
-     * search stored {@link Stat stats} given the query parameters
-     *
-     * @param {Object} query
-     * @param {string} query.select
-     * @param {string} query.order
-     * @param {string} query.filter
-     * @returns {Promise<[Stat]>}
-     */
-    async search({select, order, filter}) {
-        return this._fileDb.search({select, order, filter});
-    }
-}
+const createGetStatRepository = ({ FileDb = DefaultFileDb }) =>
+    ({pathSuffix = getDateString()}) => {
+    const path = path.resolve('db', `${type}_${pathSuffix}.${extension}`);
+    console.log(`repository created at: ${path}`);
+    return new FileDb({
+        path,
+        columns,
+        keys
+    });
+};
 
 /**
  * Get current day as 'YYYY-MM-DD'
@@ -74,9 +43,6 @@ const getDateString = () =>
     new Date().toISOString().substring(0, 'YYYY-MM-DD'.length);
 
 module.exports = {
-    StatRepository,
-    /**
-     * singleton instance using default deps
-     */
-    statRepo: new StatRepository({})
+    getStatRepository: createGetStatRepository({}),
+    createGetStatRepository
 };
