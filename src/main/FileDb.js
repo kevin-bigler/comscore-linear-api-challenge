@@ -4,6 +4,7 @@ const json2Csv = require('json2csv');
 const fs = require('fs');
 const path = require('path');
 const escapeRegex = require('escape-string-regexp');
+const papaparse = require('papaparse');
 
 /**
  * File system-backed database interface
@@ -56,12 +57,32 @@ class FileDb {
         }
     }
 
-    async search(query) {
-        // TODO:
+    async search({filter, order, select}) {
+        const matches = [];
+        await this._streamFileLines(this._path, async (line) => {
+            const record = this._parseCsvLine(line);
+            if (this._isMatch(record, filter)) {
+                matches.push(record);
+            }
+        });
         // 1. read line by line (./import/streamFileLines())
         // 2. filter the line (check against predicate, ie query.filter())
         // 3. sort by query.order field name
         // 4. pick only the properties listed in query.select[] field names array
+    }
+
+    _parseCsvLine(line) {
+        // TODO
+        const parsed = papaparse.parse(line);
+        const record = this._columns.map((k, i) => {
+            return {[k]: parsed.data[0][i]};
+        }).reduce((obj, cur) => ({...obj, ...cur}), {});
+        console.debug('parsed result:', record);
+        return record;
+    }
+
+    _isMatch(record, filter) {
+        // TODO
     }
 
     /**

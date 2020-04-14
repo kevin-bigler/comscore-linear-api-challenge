@@ -129,4 +129,9 @@ describe('FileDb', () => {
         const contents = fs.readFileSync(preExistingTestFilePath, {encoding: 'utf8'});
         expect(contents.trim()).toBe(expected.trim()); // TODO: why is this giving me a headache? contents are identical but test fails (jest issue maybe)
     });
+
+    it('#_parseCsvLine() happy path', async () => {
+        await fileDb.save({foo: 'a', bar: 'b', baz: 'c'})
+        expect(fileDb._parseCsvLine('"a|b","a","b","c"')).toEqual({UNIQUE_KEY: 'a|b', foo: 'a', bar: 'b', baz: 'c'});
+    });
 });
