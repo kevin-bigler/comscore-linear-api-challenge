@@ -88,7 +88,7 @@ class FileDb {
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir);
             }
-            fs.openSync(filePath, 'w');
+            fs.openSync(filePath, 'w+');
         } else {
             if (fs.statSync(filePath).isDirectory()) {
                 throw new Error(`path is a directory, not a file: ${filePath}`);

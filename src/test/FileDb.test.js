@@ -1,25 +1,37 @@
 const { FileDb } = require('../main/FileDb');
 const fs = require('fs');
+const fsPromises = fs.promises;
+const { existsSync } = require('fs');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 describe('FileDb', () => {
     let fileDb;
-    const testFilePath = path.resolve('src', 'test', 'db', 'test_db_file.csv');
+    let testFilePath;
+    let preExistingTestFilePath;
     const preExistingTestFileResourcesPath = path.resolve('src', 'test', 'resources', 'preexisting_test_db_file.csv');
-    const preExistingTestFilePath = path.resolve('src', 'test', 'db', 'preexisting_test_db_file.csv');
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        const uuid = uuidv4();
+        console.log('uuid:', uuid);
+        testFilePath = path.resolve('src', 'test', 'db', `test_db_file${uuid}.csv`);
+        preExistingTestFilePath = path.resolve('src', 'test', 'db', `preexisting_test_db_file${uuid}.csv`);
         fileDb = new FileDb({
             columns: ['foo', 'bar', 'baz'],
             keys: ['foo', 'bar'],
             path: testFilePath
         });
-        fs.copyFileSync(preExistingTestFileResourcesPath, preExistingTestFilePath);
+        await fsPromises.copyFile(preExistingTestFileResourcesPath, preExistingTestFilePath);
     });
 
-    afterEach(() => {
-        fs.unlinkSync(testFilePath);
-        fs.unlinkSync(preExistingTestFilePath);
+    afterEach(async () => {
+        const removeFile = async (filePath) => {
+            if (existsSync(filePath) && fs.statSync(filePath).isFile()) {
+                await fsPromises.unlink(filePath);
+            }
+        };
+        await removeFile(testFilePath);
+        await removeFile(preExistingTestFilePath);
     });
 
     it('#_toCSV() happy path - transforms values to defined columns order', () => {
