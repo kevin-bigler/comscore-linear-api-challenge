@@ -36,13 +36,14 @@ class FileDb {
     }
 
     /**
-     * persist an entry in the db
+     * persist an entry in the db.
+     *
+     * if an entry with the same key(s) exists, overwrites. otherwise, appends
      * @param {Object} entry
      * @returns {Promise<void>}
      */
     async save(entry) {
         const row = this._toCsv(entry);
-        // TODO: save the row to the file -- try to replace, and if that didn't work, append to the file
         const opts = {fields: ['UNIQUE_KEY'], header: false};
         const keyFormatted = json2Csv.parse({UNIQUE_KEY: this._getUniqueKey(entry)}, opts);
         const result = await replaceInFile({
