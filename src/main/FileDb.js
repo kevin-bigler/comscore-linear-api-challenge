@@ -45,7 +45,14 @@ class FileDb {
     }
 
     _toCsv(entry) {
-        return ''; // TODO return csv string. use column order of this._columns
+        const opts = { fields: this._columns, header: false };
+
+        try {
+            return json2Csv.parse(entry, opts);
+        } catch (err) {
+            console.error(err); // TODO: test error case... may want it to just throw and bubble up
+            throw err;
+        }
     }
 
     _getUniqueKey(entry) {
