@@ -25,6 +25,9 @@ const getCommandFn = (command) => {
         'import': importCommand,
         'query': queryCommand
     };
+    if (!map[command]) {
+        throw new Error(`invalid command or none provided (${command})`)
+    }
     return map[command];
 };
 

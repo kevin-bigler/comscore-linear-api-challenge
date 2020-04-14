@@ -10,8 +10,9 @@ const { getStatRepository: defaultGetStatRepository } = require('./statRepositor
 const createImportFile = ({
     streamFileLines = defaultStreamFileLines,
     parseLine = defaultParseImportLine,
-    statRepo = defaultGetStatRepository()
+    getStatRepo = defaultGetStatRepository
 }) => ({path}) => {
+    const statRepo = getStatRepo({});
     streamFileLines(path, async (line) => {
         const stat = parseLine(line);
         await statRepo.save(stat);

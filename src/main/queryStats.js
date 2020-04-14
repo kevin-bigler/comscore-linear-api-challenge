@@ -17,13 +17,14 @@ const parseArgCsv = (arg) => arg.split(',').map(x => x.trim()).filter(x => !!x);
  * @param {string} query.select comma-separated field(s) to show in results
  * @returns {[string]} csv row(s) of results per query params
  */
-const createQueryStats = ({statRepository = defaultGetStatRepository()}) => async ({filter, order, select}) => {
+const createQueryStats = ({getStatRepository = defaultGetStatRepository}) => async ({filter, order, select}) => {
     console.log('queryStats', {filter, order, select});
     const filterArr = parseArgCsv(filter);
     const orderArr = parseArgCsv(order);
     const selectArr = parseArgCsv(select);
     console.log('queryStats parsed args', {filterArr, orderArr, selectArr});
-    const results = await statRepository.search({filter: filterArr, order: orderArr, select: selectArr});
+    const statRepo = getStatRepository({});
+    const results = await statRepo.search({filter: filterArr, order: orderArr, select: selectArr});
     return results.map(stat => {
         const resultLine = selectArr.map(selectField => stat[selectField]).join(',');
         console.debug('result line:', resultLine);
