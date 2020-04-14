@@ -1,6 +1,8 @@
 const { streamFileLines: defaultStreamFileLines } = require('./import/streamFileLines');
 const replaceInFile = require('replace-in-file');
 const json2Csv = require('json2csv');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * File system-backed database interface
@@ -21,19 +23,26 @@ class FileDb {
         columns,
         keys
     }) {
-        // TODO: validate path and that it can be written to
+        this._ensureFileExists(path);
+        if (!this._fileAccessible(path)) {
+            throw new Error(`insufficient access to db file at path: ${path}`);
+        }
+
         this._path = path;
         this._streamFileLines = streamFileLines;
-        this._columns = ['UNIQUE_KEY', ...columns]; // unique key value goes in the first column, before all the actual property values
+        this._columns = columns;
         this._keys = keys;
     }
 
+    /**
+     * persist an entry in the db
+     * @param {Object} entry
+     * @returns {Promise<void>}
+     */
     async save(entry) {
-        const row = this._toCsv({
-            'UNIQUE_KEY': this._getUniqueKey(entry),
-            ...entry
-        });
+        const row = this._toCsv(entry);
         // TODO: save the row to the file -- try to replace, and if that didn't work, append to the file
+        fs.appendFileSync(this._path, row + "\n");
     }
 
     async search(query) {
@@ -44,21 +53,50 @@ class FileDb {
         // 4. pick only the properties listed in query.select[] field names array
     }
 
+    /**
+     *
+     * @param {Object} entry
+     * @returns {*}
+     * @throws Error if json2Csv encounters some issue during conversion
+     * @private
+     */
     _toCsv(entry) {
         const opts = { fields: this._columns, header: false };
+        return json2Csv.parse(entry, opts);
+    }
 
-        try {
-            return json2Csv.parse(entry, opts);
-        } catch (err) {
-            console.error(err); // TODO: test error case... may want it to just throw and bubble up
-            throw err;
+    _ensureFileExists(filePath) {
+        if (!fs.existsSync(filePath)) {
+            const dir = path.dirname(filePath);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir);
+            }
+            fs.openSync(filePath, 'w');
+        } else {
+            if (fs.statSync(filePath).isDirectory()) {
+                throw new Error(`path is a directory, not a file: ${filePath}`);
+            }
+        }
+
+        if (!fs.statSync(filePath).isFile()) {
+            throw new Error(`failed to create file at path: ${filePath}`);
         }
     }
 
-    _getUniqueKey(entry) {
-        return this._keys
-            .map(k => entry[k])
-            .join('|');
+    /**
+     * checks if file can be read and written to
+     * @param {string} path
+     * @returns {boolean}
+     * @private
+     */
+    _fileAccessible(path) {
+        try {
+            fs.accessSync(path, fs.constants.R_OK | fs.constants.W_OK);
+            return true;
+        } catch (err) {
+            console.error('insufficient file access', err);
+            return false;
+        }
     }
 }
 
