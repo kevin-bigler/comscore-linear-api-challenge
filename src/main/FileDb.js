@@ -88,15 +88,14 @@ class FileDb {
         // console.log('filter', filter);
         // console.log('order', order);
         // console.log('select', select);
-        const compare = (field) => (a, b) => {
-            const aString = a[field]+'';
-            const bString = b[field]+'';
-            return aString.localeCompare(bString);
-        };
-        // note: js Array sorting is in-place
-        order.forEach(orderField => matches.sort(compare(orderField)));
-        // console.debug('ordered:', matches);
-        const results = matches.map(R.pick(select));
+        const compositeSort = R.sortWith(
+            order.map(k =>
+                R.ascend(R.prop(k))
+            )
+        );
+        const sorted = compositeSort(matches);
+        // console.debug('ordered:', sorted);
+        const results = sorted.map(R.pick(select));
         // console.debug('results after select applied', results);
         return results;
     }
