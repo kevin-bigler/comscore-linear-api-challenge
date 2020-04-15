@@ -130,8 +130,27 @@ describe('FileDb', () => {
     });
 
     it('#_parseCsvLine() happy path', async () => {
-        await fileDb.save({foo: 'a', bar: 'b', baz: 'c'})
+        await fileDb.save({foo: 'a', bar: 'b', baz: 'c'});
         expect(fileDb._parseCsvLine('"a|b","a","b","c"')).toEqual({UNIQUE_KEY: 'a|b', foo: 'a', bar: 'b', baz: 'c'});
+    });
+
+    it('#save() upsert functionality happy path', async () => {
+        const fileDb = new FileDb({path: testFilePath, columns: ['a', 'b', 'c', 'd', 'e'], keys: ['a', 'b', 'd']});
+        const entry = (a, b, c, d, e) => ({a, b, c: c || '', d, e: e || ''});
+        const line = ({a, b, c, d, e}) => `"${a}|${b}|${d}","${a}","${b}","${c}","${d}","${e}"`;
+        const assertFileContents = async (expected) => {
+            const contents = fs.readFileSync(testFilePath, {encoding: 'utf8'});
+            expect(contents.trim()).toBe(expected);
+        };
+        const e1 = entry('1','2','3','4','5');
+        const e2 = entry('x','y','z','asdf','qwerty');
+        const e3 = entry('1','2','supplanted','4','exchanged');
+        await fileDb.save(e1);
+        await assertFileContents([line(e1)].join("\n"));
+        await fileDb.save(e2);
+        await assertFileContents([line(e1), line(e2)].join("\n"));
+        await fileDb.save(e3);
+        await assertFileContents([line(e3), line(e2)].join("\n"));
     });
 
     it('#search() happy path', async () => {

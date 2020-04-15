@@ -6,7 +6,7 @@ const path = require('path');
 const escapeRegex = require('escape-string-regexp');
 const papaparse = require('papaparse');
 const R = require('ramda');
-const { getPredicateFn } = require('./getPredicateFn');
+const { getPredicateFn } = require('./query/getPredicateFn');
 
 /**
  * File system-backed database interface
@@ -40,27 +40,54 @@ class FileDb {
     }
 
     /**
-     * persist an entry in the db.
+     * persist an entry in the db. upserts
      *
      * if an entry with the same key(s) exists, overwrites. otherwise, appends
+     *
      * @param {Object} entry
      * @returns {Promise<void>}
      */
     async save(entry) {
-        const row = this._toCsv(entry);
-        const opts = {fields: ['UNIQUE_KEY'], header: false};
-        const keyFormatted = json2Csv.parse({UNIQUE_KEY: this._getUniqueKey(entry)}, opts);
-        const result = await replaceInFile({
-            files: this._path,
-            from: new RegExp('^' + escapeRegex(keyFormatted) + ',.+$', 'gm'),
-            to: row
-        });
-        if (!result[0].hasChanged) {
-            console.debug('db not updated, appending');
-            await fs.promises.appendFile(this._path, row + "\n");
+        const updated = await this._update(entry);
+
+        if (!updated) {
+            console.debug('db not updated, inserting (appending)');
+            await this._insert(entry);
         } else {
             console.debug('db updated');
         }
+    }
+
+    /**
+     * update entry in db, if exists.
+     *
+     * @param entry
+     * @returns {Promise<boolean>} resolves `true` if entry existed and was updated. `false` if it did not exist/not updated
+     * @private
+     */
+    async _update(entry) {
+        // TODO: maybe change json2csv usage to papaparse (to reduce # libs and b/c it seems simpler)
+        const uniqueKeyCsvFormatted = json2Csv.parse({UNIQUE_KEY: this._getUniqueKey(entry)}, {fields: ['UNIQUE_KEY'], header: false});
+        const uniqueKeyRegexEscaped = escapeRegex(uniqueKeyCsvFormatted);
+        const row = this._toCsv(entry);
+        const result = await replaceInFile({
+            files: this._path,
+            from: new RegExp('^' + uniqueKeyRegexEscaped + ',.+$', 'gm'),
+            to: row
+        });
+        return result && result.length && result[0] && result[0].hasChanged;
+    }
+
+    /**
+     * add entry to db. does not check unique key, simply adds
+     *
+     * @param entry
+     * @returns {Promise<void>}
+     * @private
+     */
+    async _insert(entry) {
+        const row = this._toCsv(entry);
+        await fs.promises.appendFile(this._path, row + "\n");
     }
 
     /**
