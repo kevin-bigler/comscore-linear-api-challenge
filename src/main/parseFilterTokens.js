@@ -6,8 +6,8 @@
  */
 const parseFilterTokens = (filter) => {
     // the zeroth entry is the full match (eg foo>=5), hence starting at index 1 for field etc individual values
-    const [,field,operator,value] = filter.match(/([\w\d\_]+)([=><]+)([\w\d\_]+)/);
-    console.debug('filter tokens:', {field, operator, value});
+    const [,field,operator,value] = filter.match(/([\w\d\_]+)([=><]+)(.*)/);
+    // console.debug('filter tokens:', {field, operator, value});
     return {
         field,
         compare: getCompareFn(operator),
