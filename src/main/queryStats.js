@@ -16,14 +16,15 @@ const parseArgCsv = (arg, defaultVal) =>
  * search the stats repo with given query params
  *
  * @param {Object} query
+ * @param {string} query.path db path (csv)
  * @param {string} query.filter comma-separated filter expression(s)
  * @param {string} query.order comma-separated field(s) to sort results by
  * @param {string} query.select comma-separated field(s) to show in results
  * @returns {[string]} csv row(s) of results per query params
  */
-const createQueryStats = ({getStatRepository = defaultGetStatRepository}) => async ({filter, order, select}) => {
+const createQueryStats = ({getStatRepository = defaultGetStatRepository}) => async ({path, filter, order, select}) => {
     // console.log('queryStats', {filter, order, select});
-    const statRepo = getStatRepository({});
+    const statRepo = getStatRepository({path});
     const filterArr = parseArgCsv(filter, []);
     const orderArr = parseArgCsv(order, []);
     const selectArr = parseArgCsv(select, statRepo._columns.slice(1));

@@ -3,7 +3,7 @@ const replaceInFile = require('replace-in-file');
 const json2Csv = require('json2csv');
 const fs = require('fs');
 const path = require('path');
-const escapeRegex = require('escape-string-regexp');
+const escapeRegex = require('regex-escape'); //require('escape-string-regexp');
 const papaparse = require('papaparse');
 const R = require('ramda');
 const { getPredicateFn } = require('./query/getPredicateFn');
@@ -51,10 +51,10 @@ class FileDb {
         const updated = await this._update(entry);
 
         if (!updated) {
-            console.debug('db not updated, inserting (appending)');
+            // console.debug('db not updated, inserting (appending)');
             await this._insert(entry);
         } else {
-            console.debug('db updated');
+            // console.debug('db updated');
         }
     }
 
@@ -64,11 +64,14 @@ class FileDb {
      * @param entry
      * @returns {Promise<boolean>} resolves `true` if entry existed and was updated. `false` if it did not exist/not updated
      * @private
+     * TODO: fix bug dealing with comscore's watch stat format (see statRepository.test.js upsert test case)
      */
     async _update(entry) {
         // TODO: maybe change json2csv usage to papaparse (to reduce # libs and b/c it seems simpler)
         const uniqueKeyCsvFormatted = json2Csv.parse({UNIQUE_KEY: this._getUniqueKey(entry)}, {fields: ['UNIQUE_KEY'], header: false});
+        // console.log('unique key csv formatted', uniqueKeyCsvFormatted);
         const uniqueKeyRegexEscaped = escapeRegex(uniqueKeyCsvFormatted);
+        // console.log('unique key regex escaped', uniqueKeyRegexEscaped);
         const row = this._toCsv(entry);
         const result = await replaceInFile({
             files: this._path,
@@ -87,6 +90,7 @@ class FileDb {
      */
     async _insert(entry) {
         const row = this._toCsv(entry);
+        // console.debug('sav row', row);
         await fs.promises.appendFile(this._path, row + "\n");
     }
 

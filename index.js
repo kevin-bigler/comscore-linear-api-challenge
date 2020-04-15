@@ -49,7 +49,7 @@ const importCommand = ({s, d}) => {
         throw new Error('missing source argument (-s)');
     }
     if (!d) {
-        throw new Error('missing source argument (-d)');
+        throw new Error('missing destination argument (-d)');
     }
     return importFile({sourcePath: s, destinationPath: d});
 };
@@ -58,14 +58,18 @@ const importCommand = ({s, d}) => {
  * parse cli params and pass on to appropriate service/fn
  *
  * @param {Object} args
+ * @param {string} args.p Path, the db path (csv)
  * @param {string} args.f Filter, comma-separated filter expression(s)
  * @param {string} args.o Order, comma-separated field(s) to sort by
  * @param {string} args.s Select, comma-separated field(s) to show for each result
  * @returns {Promise<void>}
  */
-const queryCommand = async ({f, o, s}) => {
+const queryCommand = async ({p, f, o, s}) => {
     // TODO: validate input
-    const results = await queryStats({filter: f, order: o, select: s});
+    if (!p) {
+        throw new Error('missing db path argument (-p)');
+    }
+    const results = await queryStats({path: p, filter: f, order: o, select: s});
     results.forEach(result => console.log(result));
 };
 
