@@ -56,7 +56,10 @@ class FileDb {
             to: row
         });
         if (!result[0].hasChanged) {
+            console.debug('db not updated, appending');
             await fs.promises.appendFile(this._path, row + "\n");
+        } else {
+            console.debug('db updated');
         }
     }
 
@@ -81,10 +84,10 @@ class FileDb {
             }
         });
         // TODO: validate 'select' -- has to just be values from this._columns (error or ignore other values given)
-        console.log('matches', matches);
-        console.log('filter', filter);
-        console.log('order', order);
-        console.log('select', select);
+        // console.log('matches', matches);
+        // console.log('filter', filter);
+        // console.log('order', order);
+        // console.log('select', select);
         const compare = (field) => (a, b) => {
             const aString = a[field]+'';
             const bString = b[field]+'';
@@ -92,9 +95,9 @@ class FileDb {
         };
         // note: js Array sorting is in-place
         order.forEach(orderField => matches.sort(compare(orderField)));
-        console.debug('ordered:', matches);
+        // console.debug('ordered:', matches);
         const results = matches.map(R.pick(select));
-        console.debug('results after select applied', results);
+        // console.debug('results after select applied', results);
         return results;
     }
 
@@ -121,7 +124,7 @@ class FileDb {
         const passes = filter
             .map(getPredicateFn)
             .filter(predicateFn => predicateFn(record));
-        console.debug('_isMatch summary', {numPasses: passes.length, numFilters: filter.length});
+        // console.debug('_isMatch summary', {numPasses: passes.length, numFilters: filter.length});
         return passes.length === filter.length;
     }
 

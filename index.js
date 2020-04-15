@@ -42,13 +42,16 @@ const getCommandFn = (command) => {
  *
  * @param {Object} args
  * @param {string} args.s Source path, pointing to a file pipe-separated-values (see README)
- * // TODO: add arg "destination" (-d)
+ * @param {string} args.d Destination path of db (existing or new)
  */
-const importCommand = ({s}) => {
+const importCommand = ({s, d}) => {
     if (!s) {
         throw new Error('missing source argument (-s)');
     }
-    return importFile({path: s});
+    if (!d) {
+        throw new Error('missing source argument (-d)');
+    }
+    return importFile({sourcePath: s, destinationPath: d});
 };
 
 /**
@@ -63,7 +66,7 @@ const importCommand = ({s}) => {
 const queryCommand = async ({f, o, s}) => {
     // TODO: validate input
     const results = await queryStats({filter: f, order: o, select: s});
-    results.forEach(console.log);
+    results.forEach(result => console.log(result));
 };
 
 module.exports = {

@@ -11,9 +11,9 @@ const createImportFile = ({
     streamFileLines = defaultStreamFileLines,
     parseLine = defaultParseImportLine,
     getStatRepo = defaultGetStatRepository
-}) => ({path}) => {
-    const statRepo = getStatRepo({});
-    streamFileLines(path, async (line) => {
+}) => ({sourcePath, destinationPath}) => {
+    const statRepo = getStatRepo({path: destinationPath});
+    streamFileLines(sourcePath, async (line) => {
         const stat = parseLine(line);
         await statRepo.save(stat);
     });
