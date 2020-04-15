@@ -31,6 +31,7 @@ class FileDb {
         if (!this._fileAccessible(path)) {
             throw new Error(`insufficient access to db file at path: ${path}`);
         }
+        // console.log(`file db located at: ${path}`);
 
         this._path = path;
         this._streamFileLines = streamFileLines;

@@ -25,16 +25,17 @@ const keys = [
  *
  * repo to Store and Access {@link Stat Watch Statistics (aka "Stats")}
  */
-const createGetStatRepository = ({ FileDb = DefaultFileDb }) =>
-    ({pathSuffix = getDateString()}) => {
-    const filePath = path.resolve('db', `${type}_${pathSuffix}.${extension}`);
-    console.log(`repository created at: ${filePath}`);
-    return new FileDb({
-        path: filePath,
-        columns,
-        keys
-    });
-};
+const createGetStatRepository = ({FileDb = DefaultFileDb}) =>
+    ({path = getDefaultPath()}) => {
+        console.log(`stat repository located at: ${path}`);
+        return new FileDb({
+            path,
+            columns,
+            keys
+        });
+    };
+
+const getDefaultPath = () => path.resolve('db', `${type}_${getDateString()}.${extension}`);
 
 /**
  * Get current day as 'YYYY-MM-DD'
